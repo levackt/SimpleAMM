@@ -1,20 +1,54 @@
 use cosmwasm_std::{
-    Api, Binary, Env, Extern, HandleResponse, HandleResult, InitResponse, InitResult, Querier,
-    QueryResult, Storage,
+    Api, Binary, Env, Extern, HandleResponse, HandleResult, HumanAddr, InitResponse, InitResult,
+    Querier, QueryResult, Storage,
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
-pub struct InitMsg {}
+pub enum InitMsg {
+    InitPair {
+        token_a: HumanAddr,
+        token_a_code_hash: String,
+        token_b: HumanAddr,
+        token_b_code_hash: String,
+    },
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct Config {
+    token_a: HumanAddr,
+    token_a_code_hash: String,
+    token_b: HumanAddr,
+    token_b_code_hash: String,
+}
 
 pub fn init<S: Storage, A: Api, Q: Querier>(
-    _deps: &mut Extern<S, A, Q>,
+    deps: &mut Extern<S, A, Q>,
     _env: Env,
-    _msg: InitMsg,
+    msg: InitMsg,
 ) -> InitResult {
-    Ok(InitResponse::default())
+    match msg {
+        InitMsg::InitPair {
+            token_a,
+            token_a_code_hash,
+            token_b,
+            token_b_code_hash,
+        } => {
+            let config = Config {
+                token_a,
+                token_a_code_hash,
+                token_b,
+                token_b_code_hash,
+            };
+
+            deps.storage
+                .set(b"config", &bincode2::serialize(&config).unwrap());
+
+            Ok(InitResponse::default())
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, JsonSchema)]
