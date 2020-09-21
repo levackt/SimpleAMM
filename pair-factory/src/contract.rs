@@ -139,7 +139,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
                     callback_code_hash: config.pair_code_hash,
                     msg: Binary(
                         format!(
-                            r#"{{"a":"{}","a_code_hash":"{}","b":"{}","b_code_hash":"{}"}}"#,
+                            r#"{{"init_pair":{{"a":"{}","a_code_hash":"{}","b":"{}","b_code_hash":"{}"}}}}"#,
                             token_0.clone(),
                             token_0_code_hash.clone(),
                             token_1.clone(),
