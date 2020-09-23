@@ -1,6 +1,6 @@
 use cosmwasm_std::{
-    Api, Binary, CosmosMsg, Env, Extern, HandleResponse, HandleResult, HumanAddr, InitResponse,
-    InitResult, Querier, QueryResult, StdError, Storage, WasmMsg,
+    Api, Binary, Env, Extern, HandleResponse, HandleResult, HumanAddr, InitResponse, InitResult,
+    Querier, QueryResult, StdError, Storage, WasmMsg,
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -134,7 +134,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
                 bincode2::deserialize(&deps.storage.get(b"config").unwrap()).unwrap();
 
             Ok(HandleResponse {
-                messages: vec![CosmosMsg::Wasm(WasmMsg::Instantiate {
+                messages: vec![WasmMsg::Instantiate {
                     code_id: config.pair_code_id,
                     callback_code_hash: config.pair_code_hash,
                     msg: Binary(
@@ -150,8 +150,8 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
                     ),
                     send: vec![],
                     label: pair_label,
-                })],
-                log: Vec::default(),
+                }.into()],
+                log: vec![],
                 data: None,
             })
         }
