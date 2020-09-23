@@ -1,6 +1,6 @@
 use cosmwasm_std::{
     Api, Binary, Env, Extern, HandleResponse, HandleResult, HumanAddr, InitResponse, InitResult,
-    Querier, QueryResult, Storage, WasmMsg,
+    Querier, QueryRequest, QueryResult, Storage, WasmMsg, WasmQuery,
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -27,6 +27,12 @@ struct Config {
     token_b_code_hash: String,
 }
 
+#[derive(Serialize, Deserialize, Clone)]
+struct Reserves {
+    token_a: u128,
+    token_b: u128,
+}
+
 pub fn init<S: Storage, A: Api, Q: Querier>(
     deps: &mut Extern<S, A, Q>,
     env: Env,
@@ -47,8 +53,15 @@ pub fn init<S: Storage, A: Api, Q: Querier>(
                 token_b_code_hash: token_b_code_hash.clone(),
             };
 
+            let reserves = Reserves {
+                token_a: 0,
+                token_b: 0,
+            };
+
             deps.storage
                 .set(b"config", &bincode2::serialize(&config).unwrap());
+            deps.storage
+                .set(b"reserves", &bincode2::serialize(&reserves).unwrap());
 
             Ok(InitResponse {
                 log: vec![],
@@ -96,17 +109,62 @@ pub enum HandleMsg {
 }
 
 pub fn handle<S: Storage, A: Api, Q: Querier>(
-    _deps: &mut Extern<S, A, Q>,
-    _env: Env,
+    deps: &mut Extern<S, A, Q>,
+    env: Env,
     msg: HandleMsg,
 ) -> HandleResult {
+    let config: Config = bincode2::deserialize(&deps.storage.get(b"config").unwrap()).unwrap();
+    let reserves: Reserves =
+        bincode2::deserialize(&deps.storage.get(b"reserves").unwrap()).unwrap();
     match msg {
-        HandleMsg::AddLiquidity {} => {}
+        HandleMsg::AddLiquidity {} => {
+            // We assume that in this tx in previous messages the user had already transferred token_a and token_b to us
+
+            let balance_a = get_my_balance(
+                &deps,
+                &env,
+                config.token_a.clone(),
+                config.token_a_code_hash.clone(),
+            );
+            let balance_b = get_my_balance(
+                &deps,
+                &env,
+                config.token_b.clone(),
+                config.token_b_code_hash.clone(),
+            );
+
+            let amount_added_a = balance_a - reserves.token_a;
+            let amount_added_b = balance_b - reserves.token_b;
+        }
         HandleMsg::RemoveLiquidity {} => {}
         HandleMsg::Swap {} => {}
     }
 
     Ok(HandleResponse::default())
+}
+
+fn get_my_balance<S: Storage, A: Api, Q: Querier>(
+    deps: &Extern<S, A, Q>,
+    env: &Env,
+    token: HumanAddr,
+    code_hash: String,
+) -> u128 {
+    let balance: u128 = deps
+        .querier
+        .query(&QueryRequest::Wasm(WasmQuery::Smart {
+            contract_addr: token,
+            callback_code_hash: code_hash,
+            msg: Binary::from(
+                format!(
+                    r#"{{"balance":{{"address":"{}","viewing_key":"{}"}}}}"#,
+                    env.contract.address, SECRET20_VIEWING_KEY
+                )
+                .as_bytes()
+                .to_vec(),
+            ),
+        }))
+        .unwrap();
+    balance
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, JsonSchema)]
