@@ -118,6 +118,8 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
         bincode2::deserialize(&deps.storage.get(b"reserves").unwrap()).unwrap();
     match msg {
         HandleMsg::AddLiquidity {} => {
+            // This is a low-level funtion and should be called by a caller that knows what they're doing
+            // Otherwise you WILL lose your deposited tokens
             // We assume that in this tx in previous messages the user had already transferred token_a and token_b to us
 
             let balance_a = get_my_balance(
@@ -136,8 +138,13 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             let amount_added_a = balance_a - reserves.token_a;
             let amount_added_b = balance_b - reserves.token_b;
         }
-        HandleMsg::RemoveLiquidity {} => {}
-        HandleMsg::Swap {} => {}
+        HandleMsg::RemoveLiquidity {} => {
+            // This is a low-level funtion and should be called by a caller that knows what they're doing
+            // Otherwise you WILL lose your deposited tokens
+        }
+        HandleMsg::Swap {} => {
+ // This is a low-level funtion and should be called by a caller that knows what they're doing
+            // Otherwise you WILL lose your deposited tokens        }
     }
 
     Ok(HandleResponse::default())
