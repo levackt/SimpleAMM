@@ -143,8 +143,9 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             // Otherwise you WILL lose your deposited tokens
         }
         HandleMsg::Swap {} => {
- // This is a low-level funtion and should be called by a caller that knows what they're doing
-            // Otherwise you WILL lose your deposited tokens        }
+            // This is a low-level funtion and should be called by a caller that knows what they're doing
+            // Otherwise you WILL lose your deposited tokens
+        }
     }
 
     Ok(HandleResponse::default())
