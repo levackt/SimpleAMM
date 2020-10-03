@@ -1,2 +1,2 @@
-# SecretCFMM
-A Constant Function Market Maker Secret Contract
+
+A Simple Constant Function Market Maker implemented as a Secret Contract
