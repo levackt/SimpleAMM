@@ -71,7 +71,7 @@ pub fn init<S: Storage, A: Api, Q: Querier>(
                         callback_code_hash: token_a_code_hash.clone(),
                         msg: Binary(
                             format!(
-                                r#"{{"set_viewing_key":{{"viewing_key":"{}"}}}}"#,
+                                r#"{{"set_viewing_key":{{"key":"{}"}}}}"#,
                                 SECRET20_VIEWING_KEY,
                             )
                             .as_bytes()
@@ -85,7 +85,7 @@ pub fn init<S: Storage, A: Api, Q: Querier>(
                         callback_code_hash: token_b_code_hash.clone(),
                         msg: Binary(
                             format!(
-                                r#"{{"set_viewing_key":{{"viewing_key":"{}"}}}}"#,
+                                r#"{{"set_viewing_key":{{"key":"{}"}}}}"#,
                                 SECRET20_VIEWING_KEY,
                             )
                             .as_bytes()
@@ -164,7 +164,7 @@ fn get_my_balance<S: Storage, A: Api, Q: Querier>(
             callback_code_hash: code_hash,
             msg: Binary::from(
                 format!(
-                    r#"{{"balance":{{"address":"{}","viewing_key":"{}"}}}}"#,
+                    r#"{{"balance":{{"address":"{}","key":"{}"}}}}"#,
                     env.contract.address, SECRET20_VIEWING_KEY
                 )
                 .as_bytes()
